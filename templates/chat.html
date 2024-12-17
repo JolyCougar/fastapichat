@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+    </head>
+    <body>
+        <h1>Chat</h1>
+        <div id="namePrompt">
+            <label for="name">Enter your name:</label>
+            <input id="name" type="text" placeholder="Your name...">
+            <button onclick="setName()">Join Chat</button>
+        </div>
+        <textarea id="chat" cols="30" rows="10" readonly style="overflow-y: scroll;"></textarea><br>
+        <input id="message" type="text" placeholder="Type a message..." disabled>
+        <button onclick="sendMessage()" disabled>Send</button>
+
+        <script>
+            let ws;
+            let userName = '';
+
+            function setName() {
+                userName = document.getElementById("name").value;
+                if (userName) {
+                    document.getElementById("namePrompt").style.display = 'none';
+                    document.getElementById("message").disabled = false;
+                    document.querySelector("button[onclick='sendMessage()']").disabled = false;
+                    startWebSocket();
+                } else {
+                    alert("Please enter a name.");
+                }
+            }
+
+            function startWebSocket() {
+                ws = new WebSocket("ws://localhost:8000/ws");
+                const chat = document.getElementById("chat");
+
+                ws.onmessage = function(event) {
+                    chat.value += event.data + '\n';
+                    chat.scrollTop = chat.scrollHeight;
+                };
+            }
+
+            function sendMessage() {
+                const messageInput = document.getElementById("message");
+                ws.send(userName + ": " + messageInput.value);
+                messageInput.value = '';
+            }
+        </script>
+    </body>
+</html>
